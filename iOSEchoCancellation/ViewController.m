@@ -12,6 +12,9 @@
 typedef struct MyAUGraphStruct{
     AUGraph graph;
     AudioUnit remoteIOUnit;
+    FILE* fp;
+    char* playbackBuff;
+    long bufSize;
 } MyAUGraphStruct;
 
 #define BUFFER_COUNT 15
@@ -19,8 +22,9 @@ typedef struct MyAUGraphStruct{
 MyAUGraphStruct myStruct;
 
 AudioBuffer recordedBuffers[BUFFER_COUNT];//Used to save audio data
-int         currentBufferPointer;//Pointer to the current buffer
-int         callbackCount;
+int currentWritePointer;//Pointer to the current buffer
+int currentReadPointer;
+int callbackCount;
 
 static void CheckError(OSStatus error, const char *operation)
 {
@@ -36,7 +40,7 @@ static void CheckError(OSStatus error, const char *operation)
         // No, format it as an integer
         sprintf(errorString, "%d", (int)error);
     fprintf(stderr, "Error: %s (%s)\n", operation, errorString);
-    exit(1);
+    //exit(1);
 }
 
 OSStatus InputCallback(void *inRefCon,
@@ -47,6 +51,17 @@ OSStatus InputCallback(void *inRefCon,
                        AudioBufferList *ioData){
     //TODO: implement this function
     MyAUGraphStruct* myStruct = (MyAUGraphStruct*)inRefCon;
+
+    //inNumberFrames = 882;
+    AudioBuffer *buf = &(recordedBuffers[currentWritePointer++ % BUFFER_COUNT]);
+    buf->mDataByteSize = inNumberFrames * 2;
+    buf->mNumberChannels = 1;
+    if (buf->mData == nil)
+        buf->mData = malloc(inNumberFrames * 2);
+    
+    AudioBufferList inputData;
+    inputData.mBuffers[0] = *buf;
+    inputData.mNumberBuffers = 1;
     
     //Get samples from input bus(bus 1)
     CheckError(AudioUnitRender(myStruct->remoteIOUnit,
@@ -54,45 +69,34 @@ OSStatus InputCallback(void *inRefCon,
                                inTimeStamp,
                                1,
                                inNumberFrames,
-                               ioData),
+                               &inputData),
                "AudioUnitRender failed");
+
+    //NSLog(@"InputCallback");
+    if (myStruct->fp)
+        fwrite(buf->mData, 1, buf->mDataByteSize, myStruct->fp);
     
-    //save audio to ring buffer and load from ring buffer
-    AudioBuffer buffer = ioData->mBuffers[0];
-    recordedBuffers[currentBufferPointer].mNumberChannels = buffer.mNumberChannels;
-    recordedBuffers[currentBufferPointer].mDataByteSize = buffer.mDataByteSize;
-    free(recordedBuffers[currentBufferPointer].mData);
-    recordedBuffers[currentBufferPointer].mData = malloc(sizeof(SInt16)*buffer.mDataByteSize);
-    memcpy(recordedBuffers[currentBufferPointer].mData,
-           buffer.mData,
-           buffer.mDataByteSize);
-    currentBufferPointer = (currentBufferPointer+1)%BUFFER_COUNT;
-    
-    if (callbackCount>=BUFFER_COUNT) {
-        memcpy(buffer.mData,
-               recordedBuffers[currentBufferPointer].mData,
-               buffer.mDataByteSize);
+    return noErr;
+}
+
+OSStatus RenderCallback(void *inRefCon,
+                       AudioUnitRenderActionFlags *ioActionFlags,
+                       const AudioTimeStamp *inTimeStamp,
+                       UInt32 inBusNumber,
+                       UInt32 inNumberFrames,
+                       AudioBufferList *ioData){
+    //TODO: implement this function
+    MyAUGraphStruct* myStruct = (MyAUGraphStruct*)inRefCon;
+    if (myStruct->playbackBuff && currentReadPointer + inNumberFrames * 2 < myStruct->bufSize)
+    {
+        memcpy(ioData->mBuffers[0].mData, myStruct->playbackBuff + currentReadPointer, inNumberFrames * 2);
+        currentReadPointer += inNumberFrames * 2;
     }
-    callbackCount++;
-    
-    /*
-    SInt16 sample = 0;
-    int currentFrame = 0;
-    UInt32 bytesPerChannel = controller.streamFormat.mBytesPerFrame/controller.streamFormat.mChannelsPerFrame;
-    while (currentFrame<inNumberFrames) {
-        for (int currentChannel=0; currentChannel<buffer.mNumberChannels; currentChannel++) {
-            //Copy sample to buffer, across all channels
-            memcpy(&sample,
-                   buffer.mData+(currentFrame*controller.streamFormat.mBytesPerFrame) + currentChannel*bytesPerChannel,
-                   sizeof(sample));
-            
-            memcpy(buffer.mData+(currentFrame*controller.streamFormat.mBytesPerFrame) + currentChannel*bytesPerChannel,
-                   &sample,
-                   sizeof(sample));
-        }
-        currentFrame++;
-    }*/
-    
+    else
+    {
+        memset(ioData->mBuffers[0].mData, 0, ioData->mBuffers[0].mDataByteSize);
+    }
+
     return noErr;
 }
 
@@ -107,17 +111,7 @@ OSStatus InputCallback(void *inRefCon,
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    //Initialize currentBufferPointer
-    currentBufferPointer = 0;
-    callbackCount = 0;
-    
     [self setupSession];
-    
-    [self createAUGraph:&myStruct];
-    
-    [self setupRemoteIOUnit:&myStruct];
-    
-    [self startGraph:myStruct.graph];
     
     [self addControlButton];
 }
@@ -164,6 +158,59 @@ OSStatus InputCallback(void *inRefCon,
     
     CheckError(AUGraphStart(graph),
                "AUGraphStart failed");
+}
+
+- (IBAction)onButtonStart:(id)sender {
+    //Initialize currentBufferPointer
+    currentWritePointer = 0;
+    currentReadPointer = 0;
+    callbackCount = 0;
+    
+    NSString* fullRecordFileName = [self generateFilePath: @"temp.pcm"];
+    myStruct.fp = fopen([fullRecordFileName UTF8String], "wb");
+    
+    [self createAUGraph:&myStruct];
+    
+    [self setupRemoteIOUnit:&myStruct];
+    
+    [self startGraph:myStruct.graph];
+}
+
+- (IBAction)onButtonStop:(id)sender {
+    
+    AUGraphStop(myStruct.graph);
+    AUGraphUninitialize(myStruct.graph);
+    DisposeAUGraph(myStruct.graph);
+    
+    if (myStruct.fp)
+        fclose(myStruct.fp);
+    myStruct.fp = nil;
+    if (myStruct.playbackBuff)
+        free(myStruct.playbackBuff);
+    myStruct.playbackBuff = nil;
+    myStruct.bufSize = 0;
+}
+
+- (IBAction)onButtonPlayback:(id)sender {
+    currentWritePointer = 0;
+    currentReadPointer = 0;
+    callbackCount = 0;
+    
+    NSString* fullRecordFileName = [self generateFilePath: @"temp.pcm"];
+    FILE* fpRead = fopen([fullRecordFileName UTF8String], "rb");
+    if (myStruct.playbackBuff)
+        free(myStruct.playbackBuff);
+    
+    myStruct.bufSize = [[[NSFileManager defaultManager] attributesOfItemAtPath:fullRecordFileName error:nil] fileSize];
+    myStruct.playbackBuff = malloc(myStruct.bufSize);
+    fread(myStruct.playbackBuff, 1, myStruct.bufSize, fpRead);
+    fclose(fpRead);
+    
+    [self createAUGraph:&myStruct];
+    
+    [self setupRemoteIOUnit:&myStruct];
+    
+    [self startGraph:myStruct.graph];
 }
 
 -(void)setupRemoteIOUnit:(MyAUGraphStruct*)myStruct{
@@ -213,16 +260,36 @@ OSStatus InputCallback(void *inRefCon,
                "kAudioUnitProperty_StreamFormat of bus 1 failed");
     
     //Set up input callback
+    AURenderCallbackStruct render;
+    render.inputProc = RenderCallback;
+    render.inputProcRefCon = myStruct;
+    CheckError(AudioUnitSetProperty(myStruct->remoteIOUnit,
+                                    kAudioUnitProperty_SetRenderCallback,
+                                    kAudioUnitScope_Global,
+                                    0,//speaker
+                                    &render,
+                                    sizeof(render)),
+               "kAudioUnitProperty_SetRenderCallback failed");
+    
     AURenderCallbackStruct input;
     input.inputProc = InputCallback;
     input.inputProcRefCon = myStruct;
     CheckError(AudioUnitSetProperty(myStruct->remoteIOUnit,
-                                    kAudioUnitProperty_SetRenderCallback,
+                                    kAudioOutputUnitProperty_SetInputCallback,
                                     kAudioUnitScope_Global,
-                                    0,//input mic
+                                    1,//input mic
                                     &input,
                                     sizeof(input)),
-               "kAudioUnitProperty_SetRenderCallback failed");
+               "kAudioOutputUnitProperty_SetInputCallback failed");
+
+}
+
+-(NSString*)generateFilePath: (NSString*)filename
+{
+    NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* doc_path = [path objectAtIndex:0];
+
+    return [doc_path stringByAppendingPathComponent:filename];
 }
 
 -(void)createAUGraph:(MyAUGraphStruct*)myStruct{

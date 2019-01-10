@@ -40,7 +40,7 @@
 		8EC68B8D1ADA60630013725D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		8EC68B901ADA60630013725D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		8EC68B961ADA60630013725D /* iOSEchoCancellationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSEchoCancellationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		8EC68B9B1ADA60630013725D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8EC68B9B1ADA60630013725D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = iOSEchoCancellationTests/Info.plist; sourceTree = SOURCE_ROOT; };
 		8EC68B9C1ADA60630013725D /* iOSEchoCancellationTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = iOSEchoCancellationTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -109,6 +109,7 @@
 		8EC68B991ADA60630013725D /* iOSEchoCancellationTests */ = {
 			isa = PBXGroup;
 			children = (
+				8EC68B9B1ADA60630013725D /* Info.plist */,
 				8EC68B9C1ADA60630013725D /* iOSEchoCancellationTests.m */,
 				8EC68B9A1ADA60630013725D /* Supporting Files */,
 			);
@@ -118,7 +119,6 @@
 		8EC68B9A1ADA60630013725D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				8EC68B9B1ADA60630013725D /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -172,6 +172,8 @@
 				TargetAttributes = {
 					8EC68B7C1ADA60630013725D = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = U8JSQU6WNK;
+						ProvisioningStyle = Automatic;
 					};
 					8EC68B951ADA60630013725D = {
 						CreatedOnToolsVersion = 6.3.1;
@@ -354,11 +356,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Li Cheng (XR3U8MN7WQ)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = U8JSQU6WNK;
 				INFOPLIST_FILE = iOSEchoCancellation/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.seiriosai.iOSEchoCancellation;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "c2580794-b663-4795-89f0-ea68fd717ef7";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -366,12 +372,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Li Cheng (XR3U8MN7WQ)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = U8JSQU6WNK;
 				INFOPLIST_FILE = iOSEchoCancellation/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.seiriosai.iOSEchoCancellation;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "c2580794-b663-4795-89f0-ea68fd717ef7";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
