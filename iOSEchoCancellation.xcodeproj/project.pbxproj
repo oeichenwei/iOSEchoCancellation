@@ -15,6 +15,10 @@
 		8EC68B8E1ADA60630013725D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EC68B8D1ADA60630013725D /* Images.xcassets */; };
 		8EC68B911ADA60630013725D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8EC68B8F1ADA60630013725D /* LaunchScreen.xib */; };
 		8EC68B9D1ADA60630013725D /* iOSEchoCancellationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EC68B9C1ADA60630013725D /* iOSEchoCancellationTests.m */; };
+		D51DFB3521E79D49000D9233 /* dear.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D51DFB2F21E79D49000D9233 /* dear.mp3 */; };
+		D51DFB3621E79D49000D9233 /* SKAudioParser.m in Sources */ = {isa = PBXBuildFile; fileRef = D51DFB3121E79D49000D9233 /* SKAudioParser.m */; };
+		D51DFB3721E79D49000D9233 /* SKAudioConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = D51DFB3321E79D49000D9233 /* SKAudioConverter.m */; };
+		D51DFB3821E79D49000D9233 /* SKAudioBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = D51DFB3421E79D49000D9233 /* SKAudioBuffer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +46,13 @@
 		8EC68B961ADA60630013725D /* iOSEchoCancellationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSEchoCancellationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EC68B9B1ADA60630013725D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = iOSEchoCancellationTests/Info.plist; sourceTree = SOURCE_ROOT; };
 		8EC68B9C1ADA60630013725D /* iOSEchoCancellationTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = iOSEchoCancellationTests.m; sourceTree = "<group>"; };
+		D51DFB2E21E79D49000D9233 /* SKAudioConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKAudioConverter.h; sourceTree = "<group>"; };
+		D51DFB2F21E79D49000D9233 /* dear.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = dear.mp3; sourceTree = "<group>"; };
+		D51DFB3021E79D49000D9233 /* SKAudioParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKAudioParser.h; sourceTree = "<group>"; };
+		D51DFB3121E79D49000D9233 /* SKAudioParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKAudioParser.m; sourceTree = "<group>"; };
+		D51DFB3221E79D49000D9233 /* SKAudioBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKAudioBuffer.h; sourceTree = "<group>"; };
+		D51DFB3321E79D49000D9233 /* SKAudioConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKAudioConverter.m; sourceTree = "<group>"; };
+		D51DFB3421E79D49000D9233 /* SKAudioBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKAudioBuffer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +96,13 @@
 		8EC68B7F1ADA60630013725D /* iOSEchoCancellation */ = {
 			isa = PBXGroup;
 			children = (
+				D51DFB3921E79D57000D9233 /* resources */,
+				D51DFB3221E79D49000D9233 /* SKAudioBuffer.h */,
+				D51DFB3421E79D49000D9233 /* SKAudioBuffer.m */,
+				D51DFB2E21E79D49000D9233 /* SKAudioConverter.h */,
+				D51DFB3321E79D49000D9233 /* SKAudioConverter.m */,
+				D51DFB3021E79D49000D9233 /* SKAudioParser.h */,
+				D51DFB3121E79D49000D9233 /* SKAudioParser.m */,
 				8EC68B841ADA60630013725D /* AppDelegate.h */,
 				8EC68B851ADA60630013725D /* AppDelegate.m */,
 				8EC68B871ADA60630013725D /* ViewController.h */,
@@ -121,6 +139,14 @@
 			children = (
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		D51DFB3921E79D57000D9233 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				D51DFB2F21E79D49000D9233 /* dear.mp3 */,
+			);
+			name = resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -207,6 +233,7 @@
 			files = (
 				8EC68B8C1ADA60630013725D /* Main.storyboard in Resources */,
 				8EC68B911ADA60630013725D /* LaunchScreen.xib in Resources */,
+				D51DFB3521E79D49000D9233 /* dear.mp3 in Resources */,
 				8EC68B8E1ADA60630013725D /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -225,9 +252,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D51DFB3821E79D49000D9233 /* SKAudioBuffer.m in Sources */,
+				D51DFB3721E79D49000D9233 /* SKAudioConverter.m in Sources */,
 				8EC68B891ADA60630013725D /* ViewController.m in Sources */,
 				8EC68B861ADA60630013725D /* AppDelegate.m in Sources */,
 				8EC68B831ADA60630013725D /* main.m in Sources */,
+				D51DFB3621E79D49000D9233 /* SKAudioParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

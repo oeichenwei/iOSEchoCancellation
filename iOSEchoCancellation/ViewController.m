@@ -8,6 +8,9 @@
 
 #import "ViewController.h"
 #import <AVFoundation/AVFoundation.h>
+#import "SKAudioBuffer.h"
+#import "SKAudioParser.h"
+#import "SKAudioConverter.h"
 
 typedef struct MyAUGraphStruct{
     AUGraph graph;
@@ -15,6 +18,12 @@ typedef struct MyAUGraphStruct{
     FILE* fp;
     char* playbackBuff;
     long bufSize;
+    
+    SKAudioParser *parser;
+    SKAudioBuffer *buffer;
+    
+    SKAudioConverter *converter;
+
 } MyAUGraphStruct;
 
 #define BUFFER_COUNT 15
@@ -79,6 +88,14 @@ OSStatus InputCallback(void *inRefCon,
     return noErr;
 }
 
+OSStatus requestNumberOfFrames(MyAUGraphStruct* myStruct, UInt32 inNumberOfFrames, AudioBufferList *inIoData, UInt32 inBusNumber)
+{
+    if (myStruct->buffer.availablePacketCount < myStruct->converter.packetsPerSecond * 4) {
+        return -1;
+    }
+    return [myStruct->converter requestNumberOfFrames:inNumberOfFrames ioData:inIoData busNumber:inBusNumber buffer:myStruct->buffer];
+}
+
 OSStatus RenderCallback(void *inRefCon,
                        AudioUnitRenderActionFlags *ioActionFlags,
                        const AudioTimeStamp *inTimeStamp,
@@ -87,20 +104,28 @@ OSStatus RenderCallback(void *inRefCon,
                        AudioBufferList *ioData){
     //TODO: implement this function
     MyAUGraphStruct* myStruct = (MyAUGraphStruct*)inRefCon;
-    if (myStruct->playbackBuff && currentReadPointer + inNumberFrames * 2 < myStruct->bufSize)
+    if (myStruct->playbackBuff)
     {
-        memcpy(ioData->mBuffers[0].mData, myStruct->playbackBuff + currentReadPointer, inNumberFrames * 2);
-        currentReadPointer += inNumberFrames * 2;
+        if (currentReadPointer + inNumberFrames * 2 < myStruct->bufSize)
+        {
+            memcpy(ioData->mBuffers[0].mData, myStruct->playbackBuff + currentReadPointer, inNumberFrames * 2);
+            currentReadPointer += inNumberFrames * 2;
+        }
+        else
+        {
+            memset(ioData->mBuffers[0].mData, 0, ioData->mBuffers[0].mDataByteSize);
+        }
     }
-    else
+    else if (myStruct->converter)
     {
-        memset(ioData->mBuffers[0].mData, 0, ioData->mBuffers[0].mDataByteSize);
+        return requestNumberOfFrames(myStruct, inNumberFrames, ioData, inBusNumber);
     }
 
     return noErr;
 }
 
-@interface ViewController ()
+@interface ViewController ()<SKAudioParserDelegate>
+
 
 @end
 
@@ -160,12 +185,51 @@ OSStatus RenderCallback(void *inRefCon,
                "AUGraphStart failed");
 }
 
+- (NSString*)FilePathForResourceName: (NSString*) name
+                           extension: (NSString*) extension
+{
+    NSString* file_path = [[NSBundle mainBundle] pathForResource:name ofType:extension];
+    if (file_path == NULL) {
+        NSLog(@"Couldn't find '%@.%@' in bundle.", name, extension);
+        exit(-1);
+    }
+    return file_path;
+}
+
+- (void)audioStreamParser:(SKAudioParser *)inParser didObtainStreamDescription:(AudioStreamBasicDescription *)inDescription
+{
+    NSLog(@"mSampleRate: %f", inDescription->mSampleRate);
+    NSLog(@"mFormatID: %u", (unsigned int)inDescription->mFormatID);
+    NSLog(@"mFormatFlags: %u", (unsigned int)inDescription->mFormatFlags);
+    NSLog(@"mBytesPerPacket: %u", (unsigned int)inDescription->mBytesPerPacket);
+    NSLog(@"mFramesPerPacket: %u", (unsigned int)inDescription->mFramesPerPacket);
+    NSLog(@"mBytesPerFrame: %u", (unsigned int)inDescription->mBytesPerFrame);
+    NSLog(@"mChannelsPerFrame: %u", (unsigned int)inDescription->mChannelsPerFrame);
+    NSLog(@"mBitsPerChannel: %u", (unsigned int)inDescription->mBitsPerChannel);
+    NSLog(@"mReserved: %u", (unsigned int)inDescription->mReserved);
+    
+    myStruct.converter = [[SKAudioConverter alloc] initWithSourceFormat:inDescription];
+}
+
+- (void)audioStreamParser:(SKAudioParser *)inParser packetData:(const void * )inBytes dataLength:(UInt32)inLength packetDescriptions:(AudioStreamPacketDescription* )inPacketDescriptions packetsCount:(UInt32)inPacketsCount
+{
+    [myStruct.buffer storePacketData:inBytes dataLength:inLength packetDescriptions:inPacketDescriptions packetsCount:inPacketsCount];
+}
+
 - (IBAction)onButtonStart:(id)sender {
     //Initialize currentBufferPointer
     currentWritePointer = 0;
     currentReadPointer = 0;
     callbackCount = 0;
     
+    NSString* mp3FilePath = [self FilePathForResourceName: @"dear" extension: @"mp3"];
+    myStruct.parser = [[SKAudioParser alloc] init];
+    myStruct.parser.delegate = self;
+    myStruct.buffer = [[SKAudioBuffer alloc] init];
+    
+    NSData *data = [[NSFileManager defaultManager] contentsAtPath:mp3FilePath];
+    [myStruct.parser parseData:data];
+
     NSString* fullRecordFileName = [self generateFilePath: @"temp.pcm"];
     myStruct.fp = fopen([fullRecordFileName UTF8String], "wb");
     
@@ -189,6 +253,10 @@ OSStatus RenderCallback(void *inRefCon,
         free(myStruct.playbackBuff);
     myStruct.playbackBuff = nil;
     myStruct.bufSize = 0;
+    
+    myStruct.converter = nil;
+    myStruct.buffer = nil;
+    myStruct.parser = nil;
 }
 
 - (IBAction)onButtonPlayback:(id)sender {
