@@ -19,6 +19,7 @@
 		D51DFB3621E79D49000D9233 /* SKAudioParser.m in Sources */ = {isa = PBXBuildFile; fileRef = D51DFB3121E79D49000D9233 /* SKAudioParser.m */; };
 		D51DFB3721E79D49000D9233 /* SKAudioConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = D51DFB3321E79D49000D9233 /* SKAudioConverter.m */; };
 		D51DFB3821E79D49000D9233 /* SKAudioBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = D51DFB3421E79D49000D9233 /* SKAudioBuffer.m */; };
+		D51DFB3E21E8B778000D9233 /* AUEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = D51DFB3D21E8B778000D9233 /* AUEngine.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,8 @@
 		D51DFB3221E79D49000D9233 /* SKAudioBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKAudioBuffer.h; sourceTree = "<group>"; };
 		D51DFB3321E79D49000D9233 /* SKAudioConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKAudioConverter.m; sourceTree = "<group>"; };
 		D51DFB3421E79D49000D9233 /* SKAudioBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKAudioBuffer.m; sourceTree = "<group>"; };
+		D51DFB3C21E8B778000D9233 /* AUEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AUEngine.h; sourceTree = "<group>"; };
+		D51DFB3D21E8B778000D9233 /* AUEngine.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AUEngine.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,13 +99,9 @@
 		8EC68B7F1ADA60630013725D /* iOSEchoCancellation */ = {
 			isa = PBXGroup;
 			children = (
+				D51DFB3B21E8B6E7000D9233 /* engine */,
+				D51DFB3A21E8B6DA000D9233 /* parser */,
 				D51DFB3921E79D57000D9233 /* resources */,
-				D51DFB3221E79D49000D9233 /* SKAudioBuffer.h */,
-				D51DFB3421E79D49000D9233 /* SKAudioBuffer.m */,
-				D51DFB2E21E79D49000D9233 /* SKAudioConverter.h */,
-				D51DFB3321E79D49000D9233 /* SKAudioConverter.m */,
-				D51DFB3021E79D49000D9233 /* SKAudioParser.h */,
-				D51DFB3121E79D49000D9233 /* SKAudioParser.m */,
 				8EC68B841ADA60630013725D /* AppDelegate.h */,
 				8EC68B851ADA60630013725D /* AppDelegate.m */,
 				8EC68B871ADA60630013725D /* ViewController.h */,
@@ -147,6 +146,28 @@
 				D51DFB2F21E79D49000D9233 /* dear.mp3 */,
 			);
 			name = resources;
+			sourceTree = "<group>";
+		};
+		D51DFB3A21E8B6DA000D9233 /* parser */ = {
+			isa = PBXGroup;
+			children = (
+				D51DFB3221E79D49000D9233 /* SKAudioBuffer.h */,
+				D51DFB3421E79D49000D9233 /* SKAudioBuffer.m */,
+				D51DFB2E21E79D49000D9233 /* SKAudioConverter.h */,
+				D51DFB3321E79D49000D9233 /* SKAudioConverter.m */,
+				D51DFB3021E79D49000D9233 /* SKAudioParser.h */,
+				D51DFB3121E79D49000D9233 /* SKAudioParser.m */,
+			);
+			name = parser;
+			sourceTree = "<group>";
+		};
+		D51DFB3B21E8B6E7000D9233 /* engine */ = {
+			isa = PBXGroup;
+			children = (
+				D51DFB3C21E8B778000D9233 /* AUEngine.h */,
+				D51DFB3D21E8B778000D9233 /* AUEngine.m */,
+			);
+			name = engine;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -256,6 +277,7 @@
 				D51DFB3721E79D49000D9233 /* SKAudioConverter.m in Sources */,
 				8EC68B891ADA60630013725D /* ViewController.m in Sources */,
 				8EC68B861ADA60630013725D /* AppDelegate.m in Sources */,
+				D51DFB3E21E8B778000D9233 /* AUEngine.m in Sources */,
 				8EC68B831ADA60630013725D /* main.m in Sources */,
 				D51DFB3621E79D49000D9233 /* SKAudioParser.m in Sources */,
 			);

@@ -24,21 +24,9 @@
     return self;
 }
 
-
 - (void)storePacketData:(const void * )inBytes dataLength:(UInt32)inLength packetDescriptions:(AudioStreamPacketDescription* )inPacketDescriptions packetsCount:(UInt32)inPacketsCount
 {
-    //    for (NSUInteger packetIndex = 0; packetIndex < inPacketsCount ; packetIndex ++) {
-    //        inPacketDescriptions[packetIndex].mStartOffset += audioData.length;
-    //    }
-    //
-    //    @synchronized (self) {
-    //        [audioData appendBytes:inBytes length:inLength];
-    //        [packetDescData appendBytes:inPacketDescriptions length:sizeof(AudioStreamPacketDescription) * inPacketsCount];
-    //        availablePacketCount += inPacketsCount;
-    //    }
-    
     @synchronized (self) {
-        
         for (size_t index = 0; index < inPacketsCount; index ++) {
             
             if (packetWriteIndex >= packetCount) {
@@ -74,6 +62,11 @@
     }
 }
 
+- (bool)hasMoreData
+{
+    return packetReadIndex < _availablePacketCount;
+}
+
 - (void)setPacketReadIndex:(size_t)inNewIndex
 {
     size_t max = _availablePacketCount;
@@ -98,26 +91,6 @@
 
 - (AudioPacketInfo)currentPacketInfo
 {
-    //    @synchronized (self) {
-    //        if (readPacketIndex >= availablePacketCount) {
-    //            inCallback(nil, 0, nil, YES);
-    //            return;
-    //        }
-    //        if (readPacketIndex == 0) {
-    //            [delegate audioBufferDidBeginReadPacket:self];
-    //        }
-    //
-    //        AudioStreamPacketDescription* packetDescriptions = (AudioStreamPacketDescription* )packetDescData.bytes;
-    //
-    //        AudioPacketInfo *packet = (AudioPacketInfo *)calloc(1, sizeof(AudioPacketInfo));
-    //        packet->data = malloc(packetDescriptions[readPacketIndex].mDataByteSize);
-    //        memcpy(packet->data, audioData.bytes + packetDescriptions[readPacketIndex].mStartOffset, packetDescriptions[readPacketIndex].mDataByteSize);
-    //        memcpy(&packet->packetDescription, &packetDescriptions[readPacketIndex], sizeof(AudioStreamPacketDescription));
-    //
-    //        readPacketIndex ++;
-    //
-    //        return *packet;
-    //    }
     return packets[packetReadIndex];
 }
 

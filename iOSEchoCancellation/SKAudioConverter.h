@@ -19,7 +19,7 @@
     UInt32 renderBufferSize;
 }
 
-AudioStreamBasicDescription LinearPCMStreamDescription();
+AudioStreamBasicDescription LinearPCMStreamDescription(int channel);
 
 - (instancetype)initWithSourceFormat:(AudioStreamBasicDescription *)sourceFormat;
 - (OSStatus)requestNumberOfFrames:(UInt32)inNumberOfFrames ioData:(AudioBufferList  *)inIoData busNumber:(UInt32)inBusNumber buffer:(SKAudioBuffer *)inBuffer;

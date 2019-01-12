@@ -40,6 +40,7 @@ typedef struct {
 
 - (void)storePacketData:(const void * )inBytes dataLength:(UInt32)inLength packetDescriptions:(AudioStreamPacketDescription* )inPacketDescriptions packetsCount:(UInt32)inPacketsCount;
 - (void)movePacketReadIndex;
+- (bool)hasMoreData;
 
 @property (readonly, nonatomic) size_t availablePacketCount;
 @property (weak, nonatomic) id <SKAudioBufferDelegate> delegate;

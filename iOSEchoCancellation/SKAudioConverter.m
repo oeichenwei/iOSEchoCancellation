@@ -20,7 +20,7 @@ OSStatus AudioConverterFiller (AudioConverterRef inAudioConverter, UInt32* ioNum
     return noErr;
 }
 
-AudioStreamBasicDescription LinearPCMStreamDescription()
+AudioStreamBasicDescription LinearPCMStreamDescription(int channel)
 {
     AudioStreamBasicDescription destFormat;
     bzero(&destFormat, sizeof(AudioStreamBasicDescription));
@@ -29,9 +29,9 @@ AudioStreamBasicDescription LinearPCMStreamDescription()
     destFormat.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger;
     
     destFormat.mFramesPerPacket = 1;
-    destFormat.mBytesPerPacket = 2;
-    destFormat.mBytesPerFrame = 2;
-    destFormat.mChannelsPerFrame = 1;
+    destFormat.mBytesPerPacket = 2 * channel;
+    destFormat.mBytesPerFrame = 2 * channel;
+    destFormat.mChannelsPerFrame = channel;
     destFormat.mBitsPerChannel = 16;
     destFormat.mReserved = 0;
     return destFormat;
@@ -44,7 +44,7 @@ AudioStreamBasicDescription LinearPCMStreamDescription()
     self = [super init];
     if (self) {
         audioStreamDescription = *sourceFormat;
-        destFormat = LinearPCMStreamDescription();
+        destFormat = LinearPCMStreamDescription(2);
         AudioConverterNew(&audioStreamDescription, &destFormat, &converter);
         
         UInt32 packetSize = 44100 * 4;
@@ -80,6 +80,25 @@ AudioStreamBasicDescription LinearPCMStreamDescription()
 
 - (OSStatus)requestNumberOfFrames:(UInt32)inNumberOfFrames ioData:(AudioBufferList  *)inIoData busNumber:(UInt32)inBusNumber buffer:(SKAudioBuffer *)inBuffer
 {
+    if (destFormat.mFormatID == audioStreamDescription.mFormatID && destFormat.mChannelsPerFrame == audioStreamDescription.mChannelsPerFrame*2)
+    {
+        //TODO here hard coded, the length may not match, need to copy to an intermittent buffer
+        AudioPacketInfo currentPacketInfo = inBuffer.currentPacketInfo;
+        if (![inBuffer hasMoreData])
+            return -1;
+        void *data = currentPacketInfo.data;
+        UInt32 length = (UInt32)currentPacketInfo.packetDescription.mDataByteSize;
+        for (UInt32 i = 0; i < length / audioStreamDescription.mBytesPerFrame; i++)
+        {
+            memcpy(inIoData->mBuffers[0].mData + 4 * i, data + 2 * i, 2);
+            memcpy(inIoData->mBuffers[0].mData + 4 * i + 2, data + 2 * i, 2);
+        }
+        
+        [inBuffer movePacketReadIndex];
+        
+        return noErr;
+    }
+    
     UInt32 packetSize = inNumberOfFrames;
     NSArray *args = @[self, inBuffer];
     OSStatus status = noErr;
